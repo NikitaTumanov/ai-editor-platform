@@ -1,2 +1,5 @@
 .idea/
 *.png
+.env
+docsdb-data/
+queries.yaml

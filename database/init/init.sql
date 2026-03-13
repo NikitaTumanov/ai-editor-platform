@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS users(
+    id SERIAL PRIMARY KEY,
+    login VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS documents(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    data BYTEA NOT NULL,
+    user_id INTEGER NOT NULL REFERENCES users (id)
+);
