@@ -7,10 +7,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"storage-service/internal/database"
 	"syscall"
 	"time"
 
+	"github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/database"
+	"github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/repository"
+	"github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,11 +28,14 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	// Перенести мб?
-	dbPool, err := database.Connect()
+	pool, err := database.NewPool("postgres://docsdbuser:docsdbpass@localhost:5432/docsdb")
 	if err != nil {
 	}
-	defer dbPool.Close()
+	defer pool.Close()
+
+	userRepo := repository.NewUserRepoPGX(pool)
+	userService := service.NewUserService(userRepo)
+	userService.UserByName(context.Background(), "user.Username()")
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {

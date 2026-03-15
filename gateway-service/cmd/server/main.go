@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,7 +11,10 @@ import (
 	"syscall"
 	"time"
 
+	authpb "github.com/NikitaTumanov/ai-editor-platform/protos/auth_service"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
@@ -35,6 +39,21 @@ func main() {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
+
+	var opts = []grpc.DialOption{
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	}
+	conn, err := grpc.Dial("localhost:8030", opts...)
+	if err != nil {
+		log.Fatalf("could not create grpc connection: %v", err)
+	}
+	defer conn.Close()
+	client := authpb.NewAuthClient(conn)
+	resp, err := client.Login(context.Background(), &authpb.LoginRequest{})
+	if err != nil {
+		log.Fatalf("could not login: %v", err)
+	}
+	fmt.Println(resp)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
