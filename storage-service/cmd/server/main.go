@@ -11,16 +11,26 @@ import (
 	"time"
 
 	"github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/database"
+	zaplogger "github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/logger"
 	"github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/repository"
 	"github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/service"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func main() {
 	gin.ForceConsoleColor()
 
-	router := gin.Default()
+	logger := zaplogger.New()
+	defer logger.Sync()
 
+	pool, err := database.NewPool("postgres://docsdbuser:docsdbpass@localhost:5432/docsdb")
+	if err != nil {
+		logger.Fatal("can't initialize database pool", zap.Error(err))
+	}
+	defer pool.Close()
+
+	router := gin.Default()
 	srv := &http.Server{
 		Addr:         ":8090",
 		Handler:      router,
@@ -28,20 +38,15 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	pool, err := database.NewPool("postgres://docsdbuser:docsdbpass@localhost:5432/docsdb")
-	if err != nil {
-	}
-	defer pool.Close()
-
-	userRepo := repository.NewUserRepoPGX(pool)
-	userService := service.NewUserService(userRepo)
-	userService.UserByName(context.Background(), "user.Username()")
-
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
+
+	userRepo := repository.NewUserRepoPGX(pool)
+	userService := service.NewUserService(userRepo, logger)
+	userService.FindByUsername(context.Background(), "user.Username()")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
