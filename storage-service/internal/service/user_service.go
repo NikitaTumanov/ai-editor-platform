@@ -69,14 +69,14 @@ func (s *UserService) FindByUsername(ctx context.Context, username string) (*mod
 
 func (s *UserService) FindByID(ctx context.Context, id int64) (*models.User, error) {
 	user, err := s.repo.FindByID(ctx, id)
-	if errors.Is(err, customerrors.ErrUserNotFound) {
-		s.logger.Warn(
-			"user not found",
-			zap.Int64("userID", id),
-		)
-		return nil, err
-	}
 	if err != nil {
+		if errors.Is(err, customerrors.ErrUserNotFound) {
+			s.logger.Warn(
+				"user not found",
+				zap.Int64("userID", id),
+			)
+			return nil, err
+		}
 		s.logger.Error(
 			"failed to find user by id",
 			zap.Int64("userID", id),
