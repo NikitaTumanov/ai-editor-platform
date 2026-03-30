@@ -1,93 +1,91 @@
 syntax = "proto3";
 
-option go_package = "storage_service.v1;storagev1";
+package storage.v1;
+
+option go_package = "github.com/NikitaTumanov/ai-editor-platform/protos/storage;storagepb";
 
 service Storage{
-  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
-  rpc FindUserByUsername (FindUserByUsernameRequest) returns (FindUserByUsernameResponse);
-  rpc FindUserById (FindUserByIdRequest) returns (FindUserByIdResponse);
-  rpc UpdateUserByUsername (UpdateUserByUsernameRequest) returns (UpdateUserByUsernameResponse);
-  rpc DeleteUserByUsername (DeleteUserByUsernameRequest) returns (DeleteUserByUsernameResponse);
-
-  rpc CreateDocument (CreateDocumentRequest) returns (CreateDocumentResponse);
-  rpc FindDocumentById (FindDocumentByIdRequest) returns (FindDocumentByIdResponse);
-  rpc FindDocumentByUserId (FindDocumentByUserIdRequest) returns (FindDocumentByUserIdResponse);
-  rpc UpdateDocumentById (UpdateDocumentByIdRequest) returns (UpdateDocumentByIdResponse);
-  rpc DeleteDocumentById (DeleteDocumentByIdRequest) returns (DeleteDocumentByIdResponse);
+//  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+//  rpc FindUserByUsername (FindUserByUsernameRequest) returns (FindUserByUsernameResponse);
+//  rpc FindUserById (FindUserByIdRequest) returns (FindUserByIdResponse);
+//  rpc UpdateUserByUsername (UpdateUserByUsernameRequest) returns (UpdateUserByUsernameResponse);
+//  rpc DeleteUserByUsername (DeleteUserByUsernameRequest) returns (DeleteUserByUsernameResponse);
+//
+//  rpc CreateDocument (CreateDocumentRequest) returns (CreateDocumentResponse);
+  rpc GetDocumentById (GetDocumentByIdRequest) returns (GetDocumentByIdResponse);
+  rpc GetDocumentsByUserId (GetDocumentsByUserIdRequest) returns (GetDocumentsByUserIdResponse);
+//  rpc UpdateDocumentById (UpdateDocumentByIdRequest) returns (UpdateDocumentByIdResponse);
+//  rpc DeleteDocumentById (DeleteDocumentByIdRequest) returns (DeleteDocumentByIdResponse);
 }
 
-message CreateUserRequest {
-  string login = 1;
-  string password = 2;
-}
-
-message CreateUserResponse {
-  int64 user_id = 1;
-  string message = 2;
-}
-
-message FindUserByUsernameRequest {
-  string login = 1;
-}
-
-message FindUserByUsernameResponse {
-  int64 user_id = 1;
-  string login = 2;
-  string password = 3;
-  string message = 4;
-}
-
-message FindUserByIdRequest {
-  int64 user_id = 1;
-}
-
-message FindUserByIdResponse {
-  int64 user_id = 1;
-  string login = 2;
-  string password = 3;
-  string message = 4;
-}
-
-message UpdateUserByUsernameRequest {
-  string login = 1;
-  string new_login = 2;
-  string new_password = 3;
-}
-
-message UpdateUserByUsernameResponse {
-  string message = 1;
-}
-
-message DeleteUserByUsernameRequest {
-  string login = 1;
-}
-
-message DeleteUserByUsernameResponse {
-  string message = 1;
-}
-
-message CreateDocumentRequest {
-  string name = 1;
-  bytes data = 2;
-  int64 user_id = 3;
-}
-
-message CreateDocumentResponse {
+//message CreateUserRequest {
+//  string login = 1;
+//  string password = 2;
+//}
+//
+//message CreateUserResponse {
+//  int64 user_id = 1;
+//}
+//
+//message FindUserByUsernameRequest {
+//  string login = 1;
+//}
+//
+//message FindUserByUsernameResponse {
+//  int64 user_id = 1;
+//  string login = 2;
+//  string password = 3;
+//}
+//
+//message FindUserByIdRequest {
+//  int64 user_id = 1;
+//}
+//
+//message FindUserByIdResponse {
+//  int64 user_id = 1;
+//  string login = 2;
+//  string password = 3;
+//}
+//
+//message UpdateUserByUsernameRequest {
+//  string login = 1;
+//  string new_login = 2;
+//  string new_password = 3;
+//}
+//
+//message UpdateUserByUsernameResponse {
+//}
+//
+//message DeleteUserByUsernameRequest {
+//  string login = 1;
+//}
+//
+//message DeleteUserByUsernameResponse {
+//}
+//
+//message CreateDocumentRequest {
+//  string name = 1;
+//  bytes data = 2;
+//  int64 user_id = 3;
+//}
+//
+//message CreateDocumentResponse {
+//  int64 document_id = 1;
+//}
+//
+message GetDocumentByIdRequest {
   int64 document_id = 1;
-  string message = 2;
+  int64 user_id = 2;
 }
 
-message FindDocumentByIdRequest {
+message GetDocumentByIdResponse {
   int64 document_id = 1;
+  string name = 2;
+  bytes data = 3;
+  int64 user_id = 4;
 }
 
-message FindDocumentByIdResponse {
-  string name = 1;
-  bytes data = 2;
-  string message = 3;
-}
-
-message FindDocumentByUserIdRequest {
+message GetDocumentsByUserIdRequest {
   int64 user_id = 1;
 }
 
@@ -96,25 +94,24 @@ message Document {
   string name = 2;
 }
 
-message FindDocumentByUserIdResponse {
+message GetDocumentsByUserIdResponse {
   repeated Document documents = 1;
-  string message = 2;
 }
-
-message UpdateDocumentByIdRequest {
-  int64 document_id = 1;
-  string name = 2;
-  bytes data = 3;
-}
-
-message UpdateDocumentByIdResponse {
-  string message = 1;
-}
-
-message DeleteDocumentByIdRequest {
-  int64 document_id = 1;
-}
-
-message DeleteDocumentByIdResponse {
-  string message = 1;
-}
+//
+//message UpdateDocumentByIdRequest {
+//  int64 document_id = 1;
+//  string name = 2;
+//  bytes data = 3;
+//}
+//
+//message UpdateDocumentByIdResponse {
+//
+//}
+//
+//message DeleteDocumentByIdRequest {
+//  int64 document_id = 1;
+//}
+//
+//message DeleteDocumentByIdResponse {
+//
+//}

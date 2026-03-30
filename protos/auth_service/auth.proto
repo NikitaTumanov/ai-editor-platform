@@ -1,10 +1,13 @@
 syntax = "proto3";
 
-option go_package = "auth_service.v1;authv1";
+package auth.v1;
+
+option go_package = "github.com/NikitaTumanov/ai-editor-platform/protos/auth;authpb";
 
 service Auth{
   rpc Register (RegisterRequest) returns (RegisterResponse);
   rpc Login (LoginRequest) returns (LoginResponse);
+  rpc ValidateToken (TokenRequest) returns (TokenResponse);
 }
 
 message RegisterRequest {
@@ -23,4 +26,13 @@ message LoginRequest {
 
 message LoginResponse {
   string token = 1;
+}
+
+message TokenRequest {
+  string token = 1;
+}
+
+message TokenResponse {
+  int64 user_id = 1;
+  bool valid = 2;
 }

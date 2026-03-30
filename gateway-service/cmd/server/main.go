@@ -3,29 +3,64 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
-	"log"
+
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	authpb "github.com/NikitaTumanov/ai-editor-platform/protos/auth_service"
+	"github.com/NikitaTumanov/ai-editor-platform/gateway-service/internal/handlers"
+	zaplogger "github.com/NikitaTumanov/ai-editor-platform/gateway-service/internal/logger"
+	"github.com/NikitaTumanov/ai-editor-platform/gateway-service/internal/repository/grpc"
+	"go.uber.org/zap"
+
 	"github.com/gin-gonic/gin"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
 	gin.ForceConsoleColor()
 
+	logger := zaplogger.New()
+	defer logger.Sync()
+
 	router := gin.Default()
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+
+	authRepo := grpc.NewAuthServiceGrpc()
+	defer authRepo.Close()
+	authHandler := handlers.NewAuthHandler(logger, authRepo)
+	authAPI := router.Group("/auth")
+	{
+		authAPI.POST("/login", authHandler.Login)
+		authAPI.POST("/register", authHandler.Register)
+	}
+
+	//aiRepo := grpc.NewAiServiceGrpc()
+	//defer aiRepo.Close()
+	//aiHandler := handlers.NewAiHandler(logger, aiRepo)
+	aiAPI := router.Group("/ai")
+	{
+		aiAPI.GET("/ask", aiHandler.Ask)          // TODO
+		aiAPI.PATCH("/updateFile", aiHandler.UpdateFile) // TODO
+	}
+
+	//documentRepo := grpc.NewDocumentServiceGrpc()
+	//defer documentRepo.Close()
+	//documentHandler := handlers.NewDocumentHandler(logger, documentRepo)
+	documentAPI := router.Group("/document")
+	{
+		documentAPI.POST("/add", documentHandler.)     // TODO
+		documentAPI.PATCH("/update", documentHandler.) // TODO
+	}
+
+	storageRepo := grpc.NewStorageServiceGrpc()
+	defer storageRepo.Close()
+	storageHandler := handlers.NewStorageHandler(logger, storageRepo)
+	storageAPI := router.Group("/storage")
+	{
+		storageAPI.GET("/file/:id", storageHandler.DocumentByID)
+		storageAPI.GET("/fileByUser/:user_id", storageHandler.DocumentsByUserID)
+	}
 
 	srv := &http.Server{
 		Addr:         ":8080",
@@ -35,35 +70,21 @@ func main() {
 	}
 
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("listen: %s\n", err)
+		err := srv.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Fatal("listen error", zap.Error(err))
 		}
 	}()
-
-	var opts = []grpc.DialOption{
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	}
-	conn, err := grpc.Dial("localhost:8030", opts...)
-	if err != nil {
-		log.Fatalf("could not create grpc connection: %v", err)
-	}
-	defer conn.Close()
-	client := authpb.NewAuthClient(conn)
-	resp, err := client.Login(context.Background(), &authpb.LoginRequest{})
-	if err != nil {
-		log.Fatalf("could not login: %v", err)
-	}
-	fmt.Println(resp)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("Shutting down server...")
+	logger.Info("Shutting down server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown:", err)
+		logger.Fatal("Server forced to shutdown:", zap.Error(err))
 	}
-	log.Println("Server exiting")
+	logger.Info("Server exiting")
 }
