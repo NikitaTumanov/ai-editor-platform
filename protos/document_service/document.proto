@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package document.v1;
+
+option go_package = "github.com/NikitaTumanov/ai-editor-platform/protos/document;documentpb";
+
+service Document {
+  rpc AddDocument (AddDocumentRequest) returns (AddDocumentResponse);
+  rpc UpdateDocumentById (UpdateDocumentByIdRequest) returns (UpdateDocumentByIdResponse);
+}
+
+message AddDocumentRequest {
+  string name = 1;
+  bytes data = 2;
+  int64 user_id = 3;
+}
+
+message AddDocumentResponse {
+  int64 document_id = 1;
+}
+
+message UpdateDocumentByIdRequest {
+  int64 document_id = 1;
+  int64 user_id = 2;
+  bytes new_data = 3;
+}
+
+message UpdateDocumentByIdResponse {
+  int64 document_id = 1;
+}

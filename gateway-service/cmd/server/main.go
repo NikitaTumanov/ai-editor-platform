@@ -35,22 +35,22 @@ func main() {
 		authAPI.POST("/register", authHandler.Register)
 	}
 
-	//aiRepo := grpc.NewAiServiceGrpc()
-	//defer aiRepo.Close()
-	//aiHandler := handlers.NewAiHandler(logger, aiRepo)
+	aiRepo := grpc.NewAiServiceGrpc()
+	defer aiRepo.Close()
+	aiHandler := handlers.NewAiHandler(logger, aiRepo)
 	aiAPI := router.Group("/ai")
 	{
-		aiAPI.GET("/ask", aiHandler.Ask)          // TODO
-		aiAPI.PATCH("/updateFile", aiHandler.UpdateFile) // TODO
+		aiAPI.GET("/ask", aiHandler.Question)
+		aiAPI.PATCH("/updateFile", aiHandler.UpdateDocumentById)
 	}
 
-	//documentRepo := grpc.NewDocumentServiceGrpc()
-	//defer documentRepo.Close()
-	//documentHandler := handlers.NewDocumentHandler(logger, documentRepo)
+	documentRepo := grpc.NewDocumentServiceGrpc()
+	defer documentRepo.Close()
+	documentHandler := handlers.NewDocumentHandler(logger, documentRepo)
 	documentAPI := router.Group("/document")
 	{
-		documentAPI.POST("/add", documentHandler.)     // TODO
-		documentAPI.PATCH("/update", documentHandler.) // TODO
+		documentAPI.POST("/add", documentHandler.AddDocument)
+		documentAPI.PATCH("/update", documentHandler.UpdateDocumentById)
 	}
 
 	storageRepo := grpc.NewStorageServiceGrpc()

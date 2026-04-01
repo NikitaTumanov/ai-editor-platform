@@ -1,11 +1,16 @@
 package handlers
 
 import (
+	"context"
+
+	documentpb "github.com/NikitaTumanov/ai-editor-platform/protos/document_service"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
 type DocumentRepository interface {
+	AddDocument(ctx context.Context, in *documentpb.AddDocumentRequest) (*documentpb.AddDocumentResponse, error)
+	UpdateDocumentById(ctx context.Context, in *documentpb.UpdateDocumentByIdRequest) (*documentpb.UpdateDocumentByIdResponse, error)
 }
 
 type DocumentHandler struct {
@@ -20,10 +25,10 @@ func NewDocumentHandler(logger *zap.Logger, documentRepo DocumentRepository) *Do
 	}
 }
 
-func (h *DocumentHandler) Add(c *gin.Context) {
-	h.documentRepo.Add
+func (h *DocumentHandler) AddDocument(c *gin.Context) {
+	h.documentRepo.AddDocument()
 }
 
-func (h *DocumentHandler) Update(c *gin.Context) {
-	h.documentRepo.Update
+func (h *DocumentHandler) UpdateDocumentById(c *gin.Context) {
+	h.documentRepo.UpdateDocumentById()
 }

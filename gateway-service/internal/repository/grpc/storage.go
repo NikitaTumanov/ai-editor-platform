@@ -34,11 +34,13 @@ func NewStorageServiceGrpc() *StorageServiceGrpc {
 }
 
 func (s *StorageServiceGrpc) DocumentByID(ctx context.Context, in *storagepb.GetDocumentByIdRequest) (*storagepb.GetDocumentByIdResponse, error) {
-	s.Client.GetDocumentById()
+	res, err := s.Client.GetDocumentById(ctx, in)
+	return res, err
 }
 
 func (s *StorageServiceGrpc) DocumentsByUserID(ctx context.Context, in *storagepb.GetDocumentsByUserIdRequest) (*storagepb.GetDocumentsByUserIdResponse, error) {
-	s.Client.GetDocumentsByUserId()
+	res, err := s.Client.GetDocumentsByUserId(ctx, in)
+	return res, err
 }
 
 func (s *StorageServiceGrpc) Close() error {
