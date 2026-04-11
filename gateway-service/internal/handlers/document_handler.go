@@ -26,9 +26,9 @@ func NewDocumentHandler(logger *zap.Logger, documentRepo DocumentRepository) *Do
 }
 
 func (h *DocumentHandler) AddDocument(c *gin.Context) {
-	h.documentRepo.AddDocument()
+	//h.documentRepo.AddDocument()
 }
 
 func (h *DocumentHandler) UpdateDocumentById(c *gin.Context) {
-	h.documentRepo.UpdateDocumentById()
+	//h.documentRepo.UpdateDocumentById()
 }

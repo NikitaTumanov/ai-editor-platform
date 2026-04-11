@@ -26,9 +26,9 @@ func NewStorageHandler(logger *zap.Logger, storageRepo StorageRepository) *Stora
 }
 
 func (h *StorageHandler) DocumentByID(c *gin.Context) {
-	h.storageRepo.DocumentByID()
+	//h.storageRepo.DocumentByID()
 }
 
 func (h *StorageHandler) DocumentsByUserID(c *gin.Context) {
-	h.storageRepo.DocumentsByUserID()
+	//h.storageRepo.DocumentsByUserID()
 }

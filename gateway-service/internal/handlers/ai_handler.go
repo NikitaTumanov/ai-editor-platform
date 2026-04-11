@@ -26,9 +26,9 @@ func NewAiHandler(logger *zap.Logger, aiRepo AiRepository) *AiHandler {
 }
 
 func (h *AiHandler) Question(c *gin.Context) {
-	h.aiRepo.Question()
+	//h.aiRepo.Question()
 }
 
 func (h *AiHandler) UpdateDocumentById(c *gin.Context) {
-	h.aiRepo.UpdateDocumentById()
+	//h.aiRepo.UpdateDocumentById()
 }
