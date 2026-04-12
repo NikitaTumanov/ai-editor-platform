@@ -17,8 +17,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StorageClient interface {
-	// rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
-	// rpc FindUserByUsername (FindUserByUsernameRequest) returns (FindUserByUsernameResponse);
+	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
+	FindUserByUsername(ctx context.Context, in *FindUserByUsernameRequest, opts ...grpc.CallOption) (*FindUserByUsernameResponse, error)
 	// rpc FindUserById (FindUserByIdRequest) returns (FindUserByIdResponse);
 	// rpc UpdateUserByUsername (UpdateUserByUsernameRequest) returns (UpdateUserByUsernameResponse);
 	// rpc DeleteUserByUsername (DeleteUserByUsernameRequest) returns (DeleteUserByUsernameResponse);
@@ -34,6 +34,24 @@ type storageClient struct {
 
 func NewStorageClient(cc grpc.ClientConnInterface) StorageClient {
 	return &storageClient{cc}
+}
+
+func (c *storageClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
+	out := new(CreateUserResponse)
+	err := c.cc.Invoke(ctx, "/storage.v1.Storage/CreateUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *storageClient) FindUserByUsername(ctx context.Context, in *FindUserByUsernameRequest, opts ...grpc.CallOption) (*FindUserByUsernameResponse, error) {
+	out := new(FindUserByUsernameResponse)
+	err := c.cc.Invoke(ctx, "/storage.v1.Storage/FindUserByUsername", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *storageClient) GetDocumentById(ctx context.Context, in *GetDocumentByIdRequest, opts ...grpc.CallOption) (*GetDocumentByIdResponse, error) {
@@ -58,8 +76,8 @@ func (c *storageClient) GetDocumentsByUserId(ctx context.Context, in *GetDocumen
 // All implementations must embed UnimplementedStorageServer
 // for forward compatibility
 type StorageServer interface {
-	// rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
-	// rpc FindUserByUsername (FindUserByUsernameRequest) returns (FindUserByUsernameResponse);
+	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
+	FindUserByUsername(context.Context, *FindUserByUsernameRequest) (*FindUserByUsernameResponse, error)
 	// rpc FindUserById (FindUserByIdRequest) returns (FindUserByIdResponse);
 	// rpc UpdateUserByUsername (UpdateUserByUsernameRequest) returns (UpdateUserByUsernameResponse);
 	// rpc DeleteUserByUsername (DeleteUserByUsernameRequest) returns (DeleteUserByUsernameResponse);
@@ -74,6 +92,12 @@ type StorageServer interface {
 type UnimplementedStorageServer struct {
 }
 
+func (UnimplementedStorageServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+}
+func (UnimplementedStorageServer) FindUserByUsername(context.Context, *FindUserByUsernameRequest) (*FindUserByUsernameResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindUserByUsername not implemented")
+}
 func (UnimplementedStorageServer) GetDocumentById(context.Context, *GetDocumentByIdRequest) (*GetDocumentByIdResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDocumentById not implemented")
 }
@@ -91,6 +115,42 @@ type UnsafeStorageServer interface {
 
 func RegisterStorageServer(s *grpc.Server, srv StorageServer) {
 	s.RegisterService(&_Storage_serviceDesc, srv)
+}
+
+func _Storage_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServer).CreateUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/storage.v1.Storage/CreateUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServer).CreateUser(ctx, req.(*CreateUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Storage_FindUserByUsername_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FindUserByUsernameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServer).FindUserByUsername(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/storage.v1.Storage/FindUserByUsername",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServer).FindUserByUsername(ctx, req.(*FindUserByUsernameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Storage_GetDocumentById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -133,6 +193,14 @@ var _Storage_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "storage.v1.Storage",
 	HandlerType: (*StorageServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateUser",
+			Handler:    _Storage_CreateUser_Handler,
+		},
+		{
+			MethodName: "FindUserByUsername",
+			Handler:    _Storage_FindUserByUsername_Handler,
+		},
 		{
 			MethodName: "GetDocumentById",
 			Handler:    _Storage_GetDocumentById_Handler,

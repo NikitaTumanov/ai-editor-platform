@@ -2,19 +2,16 @@ package main
 
 import (
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
+	"net"
 
+	storagepb "github.com/NikitaTumanov/ai-editor-platform/protos/storage_service"
 	"github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/database"
 	zaplogger "github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/logger"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 )
 
 func main() {
-	gin.ForceConsoleColor()
-
 	logger := zaplogger.New()
 	defer logger.Sync()
 
@@ -24,9 +21,14 @@ func main() {
 	}
 	defer pool.Close()
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	log.Println("Shutting down server...")
-	log.Println("Server exiting")
+	lis, err := net.Listen("tcp", ":8040")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	var opts []grpc.ServerOption
+
+	grpcServer := grpc.NewServer(opts...)
+
+	storagepb.RegisterStorageServer(grpcServer, storagegrpc.NewStorageHandler(logger, pool))
 }

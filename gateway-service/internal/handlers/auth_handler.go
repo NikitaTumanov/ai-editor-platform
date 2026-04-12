@@ -4,18 +4,19 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	customerrors "github.com/NikitaTumanov/ai-editor-platform/gateway-service/internal/errors"
 	"github.com/NikitaTumanov/ai-editor-platform/gateway-service/internal/models"
 	authpb "github.com/NikitaTumanov/ai-editor-platform/protos/auth_service"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
 )
 
 type AuthRepository interface {
 	Register(ctx context.Context, in *authpb.RegisterRequest) (*authpb.RegisterResponse, error)
 	Login(ctx context.Context, in *authpb.LoginRequest) (*authpb.LoginResponse, error)
+	ValidateToken(ctx context.Context, in *authpb.TokenRequest) (*authpb.TokenResponse, error)
 }
 
 type AuthHandler struct {
@@ -30,81 +31,22 @@ func NewAuthHandler(logger *zap.Logger, authRepo AuthRepository) *AuthHandler {
 	}
 }
 
-func formatValidationError(err error) map[string]string {
-	errors := make(map[string]string)
-
-	if ve, ok := err.(validator.ValidationErrors); ok {
-		for _, fieldErr := range ve {
-			field := fieldErr.Field()
-
-			switch fieldErr.Tag() {
-			case "required":
-				errors[field] = "field is required"
-			case "min":
-				errors[field] = "too short"
-			case "max":
-				errors[field] = "too long"
-			default:
-				errors[field] = "invalid value"
-			}
-		}
-	}
-
-	return errors
-}
-
 func (h *AuthHandler) Register(c *gin.Context) {
 	var registerReq models.RegisterDTO
 	err := c.ShouldBindJSON(&registerReq)
 	if err != nil {
-		h.logger.Warn("failed to parse body", zap.Error(err))
+		h.logger.Warn(customerrors.ErrIncorrectJSON.Error(), zap.Error(err))
 
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error":  customerrors.ErrIncorrectJSON.Error(),
-			"fields": formatValidationError(err),
+			"fields": customerrors.FormatValidationError(err),
 		})
 		return
 	}
 
-	//if registerReq.Login == "" {
-	//	h.logger.Warn("user login is empty")
-	//
-	//	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": customerrors.ErrEmptyLogin.Error()})
-	//	return
-	//}
-	//if len([]rune(registerReq.Login)) > settings.MaxLoginLen {
-	//	h.logger.Warn(customerrors.ErrLongLogin.Error())
-	//
-	//	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": customerrors.ErrLongLogin.Error()})
-	//	return
-	//}
-	//if len([]rune(registerReq.Login)) < settings.MinLoginLen {
-	//	h.logger.Warn(customerrors.ErrShortLogin.Error())
-	//
-	//	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": customerrors.ErrShortLogin.Error()})
-	//	return
-	//}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
-	//if registerReq.Password == "" {
-	//	h.logger.Warn("user password is empty")
-	//
-	//	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": customerrors.ErrEmptyPassword.Error()})
-	//	return
-	//}
-	//if len([]rune(registerReq.Password)) > settings.MaxPasswordLen {
-	//	h.logger.Warn(customerrors.ErrLongPassword.Error())
-	//
-	//	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": customerrors.ErrLongPassword.Error()})
-	//	return
-	//}
-	//if len([]rune(registerReq.Password)) < settings.MinPasswordLen {
-	//	h.logger.Warn(customerrors.ErrShortPassword.Error())
-	//
-	//	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": customerrors.ErrShortPassword.Error()})
-	//	return
-	//}
-
-	ctx := context.Background() // Сменить на нормальный
 	resp, err := h.authRepo.Register(ctx, &authpb.RegisterRequest{
 		Login:    registerReq.Login,
 		Password: registerReq.Password,
@@ -124,6 +66,35 @@ func (h *AuthHandler) Register(c *gin.Context) {
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
-	ctx := context.Background()
-	h.authRepo.Login(ctx, &authpb.LoginRequest{})
+	var loginReq models.LoginDTO
+	err := c.ShouldBindJSON(&loginReq)
+	if err != nil {
+		h.logger.Warn(customerrors.ErrIncorrectJSON.Error(), zap.Error(err))
+
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error":  customerrors.ErrIncorrectJSON.Error(),
+			"fields": customerrors.FormatValidationError(err),
+		})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	resp, err := h.authRepo.Login(ctx, &authpb.LoginRequest{
+		Login:    loginReq.Login,
+		Password: loginReq.Password,
+	})
+	if err != nil {
+		h.logger.Error(
+			"failed to login",
+			zap.String("login", loginReq.Login),
+			zap.Error(err))
+
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": customerrors.ErrLogin.Error()})
+		return
+	}
+
+	h.logger.Info(fmt.Sprintf("%s login successfully", loginReq.Login))
+	c.JSON(http.StatusOK, resp)
 }

@@ -5,8 +5,8 @@ package storage.v1;
 option go_package = "github.com/NikitaTumanov/ai-editor-platform/protos/storage;storagepb";
 
 service Storage{
-//  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
-//  rpc FindUserByUsername (FindUserByUsernameRequest) returns (FindUserByUsernameResponse);
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+  rpc FindUserByUsername (FindUserByUsernameRequest) returns (FindUserByUsernameResponse);
 //  rpc FindUserById (FindUserByIdRequest) returns (FindUserByIdResponse);
 //  rpc UpdateUserByUsername (UpdateUserByUsernameRequest) returns (UpdateUserByUsernameResponse);
 //  rpc DeleteUserByUsername (DeleteUserByUsernameRequest) returns (DeleteUserByUsernameResponse);
@@ -18,24 +18,24 @@ service Storage{
 //  rpc DeleteDocumentById (DeleteDocumentByIdRequest) returns (DeleteDocumentByIdResponse);
 }
 
-//message CreateUserRequest {
-//  string login = 1;
-//  string password = 2;
-//}
-//
-//message CreateUserResponse {
-//  int64 user_id = 1;
-//}
-//
-//message FindUserByUsernameRequest {
-//  string login = 1;
-//}
-//
-//message FindUserByUsernameResponse {
-//  int64 user_id = 1;
-//  string login = 2;
-//  string password = 3;
-//}
+message CreateUserRequest {
+  string login = 1;
+  string password = 2;
+}
+
+message CreateUserResponse {
+  int64 user_id = 1;
+}
+
+message FindUserByUsernameRequest {
+  string login = 1;
+}
+
+message FindUserByUsernameResponse {
+  int64 user_id = 1;
+  string login = 2;
+  string password = 3;
+}
 //
 //message FindUserByIdRequest {
 //  int64 user_id = 1;

@@ -44,6 +44,11 @@ func (s *AuthServiceGrpc) Login(ctx context.Context, in *authpb.LoginRequest) (*
 	return resp, err
 }
 
+func (s *AuthServiceGrpc) ValidateToken(ctx context.Context, in *authpb.TokenRequest) (*authpb.TokenResponse, error) {
+	resp, err := s.Client.ValidateToken(ctx, in)
+	return resp, err
+}
+
 func (s *AuthServiceGrpc) Close() error {
 	return s.Conn.Close()
 }

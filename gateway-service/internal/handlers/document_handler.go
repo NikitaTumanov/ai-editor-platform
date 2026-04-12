@@ -26,7 +26,9 @@ func NewDocumentHandler(logger *zap.Logger, documentRepo DocumentRepository) *Do
 }
 
 func (h *DocumentHandler) AddDocument(c *gin.Context) {
-	//h.documentRepo.AddDocument()
+	// TODO Вызвать проверку токена и получить ID пользователя
+	//userID := int64(3)
+
 }
 
 func (h *DocumentHandler) UpdateDocumentById(c *gin.Context) {
