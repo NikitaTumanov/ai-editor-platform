@@ -8,6 +8,7 @@ import (
 	"github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/database"
 	storagegrpc "github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/grpc"
 	zaplogger "github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/logger"
+	"github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/repository"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -22,6 +23,9 @@ func main() {
 	}
 	defer pool.Close()
 
+	userRepo := repository.NewUserRepoPGX(pool)
+	documentRepo := repository.NewDocumentRepoPGX(pool)
+
 	lis, err := net.Listen("tcp", ":8040")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -31,6 +35,6 @@ func main() {
 
 	grpcServer := grpc.NewServer(opts...)
 
-	storagepb.RegisterStorageServer(grpcServer, storagegrpc.NewStorageHandler(logger, pool))
+	storagepb.RegisterStorageServer(grpcServer, storagegrpc.NewStorageHandler(logger, userRepo, documentRepo))
 	grpcServer.Serve(lis)
 }
