@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package document.v1;
 
-option go_package = "github.com/NikitaTumanov/ai-editor-platform/protos/document;documentpb";
+option go_package = "github.com/NikitaTumanov/ai-editor-platform/protos/document_service;documentpb";
 
 service Document {
   rpc AddDocument (AddDocumentRequest) returns (AddDocumentResponse);

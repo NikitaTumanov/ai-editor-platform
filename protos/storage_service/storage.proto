@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package storage.v1;
 
-option go_package = "github.com/NikitaTumanov/ai-editor-platform/protos/storage;storagepb";
+option go_package = "github.com/NikitaTumanov/ai-editor-platform/protos/storage_service;storagepb";
 
 service Storage{
   rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);

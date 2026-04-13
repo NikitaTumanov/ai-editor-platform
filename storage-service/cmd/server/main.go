@@ -6,6 +6,7 @@ import (
 
 	storagepb "github.com/NikitaTumanov/ai-editor-platform/protos/storage_service"
 	"github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/database"
+	storagegrpc "github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/grpc"
 	zaplogger "github.com/NikitaTumanov/ai-editor-platform/storage-service/internal/logger"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -31,4 +32,5 @@ func main() {
 	grpcServer := grpc.NewServer(opts...)
 
 	storagepb.RegisterStorageServer(grpcServer, storagegrpc.NewStorageHandler(logger, pool))
+	grpcServer.Serve(lis)
 }

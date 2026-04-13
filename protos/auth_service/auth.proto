@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package auth.v1;
 
-option go_package = "github.com/NikitaTumanov/ai-editor-platform/protos/auth;authpb";
+option go_package = "github.com/NikitaTumanov/ai-editor-platform/protos/auth_service;authpb";
 
 service Auth{
   rpc Register (RegisterRequest) returns (RegisterResponse);

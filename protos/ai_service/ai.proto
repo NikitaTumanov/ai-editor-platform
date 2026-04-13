@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package ai.v1;
 
-option go_package = "github.com/NikitaTumanov/ai-editor-platform/protos/ai;aipb";
+option go_package = "github.com/NikitaTumanov/ai-editor-platform/protos/ai_service;aipb";
 
 service AI {
   rpc Question (QuestionRequest) returns (QuestionResponse);

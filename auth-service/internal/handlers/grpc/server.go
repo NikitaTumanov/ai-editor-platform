@@ -27,10 +27,19 @@ func NewAuthHandler(logger *zap.Logger, storageRepo StorageRepository) *AuthHand
 	}
 }
 
-func (s *AuthHandler) Login(_ context.Context, in *authpb.LoginRequest) (*authpb.LoginResponse, error) {
+func (s *AuthHandler) Login(ctx context.Context, in *authpb.LoginRequest) (*authpb.LoginResponse, error) {
+	s.storageRepo.FindUserByUsername(ctx, &storagepb.FindUserByUsernameRequest{
+		Login: in.Login,
+	})
+
 	return &authpb.LoginResponse{Token: "asacac"}, nil
 }
 
-func (s *AuthHandler) Register(_ context.Context, in *authpb.RegisterRequest) (*authpb.RegisterResponse, error) {
+func (s *AuthHandler) Register(ctx context.Context, in *authpb.RegisterRequest) (*authpb.RegisterResponse, error) {
+	s.storageRepo.CreateUser(ctx, &storagepb.CreateUserRequest{
+		Login:    in.Login,
+		Password: in.Password,
+	})
+
 	return &authpb.RegisterResponse{UserId: 1}, nil
 }
